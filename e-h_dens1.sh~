@@ -1,0 +1,65 @@
+##############################################################################################################################
+#
+#   Get attachment density
+#
+##############################################################################################################################
+
+
+grep occupied run.out | awk '{print $4}' > exstate
+
+nnuc=152
+npi=124
+norb=66
+nci=200
+
+step=0
+
+#gunzip CI_coefs.dat.gz
+
+## attachment_density.cc --> AD
+## collect_MOs.cc ---------> ColMO
+
+./../../../../../Utils/AD $npi $nci $norb 7 < exstate > dtemp1
+
+./../../../../../Utils/ColMO $npi $norb $step 0 < dtemp1 > attach.dat
+
+#gzip CI_coefs.dat
+
+##############################################################################################################################
+#
+#   Makes e-h density movie or still
+#
+##############################################################################################################################
+
+
+#for ((l = 0 ; l < $nfolder ; l++)) 
+#do
+#    cat $l/movie.xyz
+#done > movie.xyz
+
+#for ((l = 0 ; l < $nfolder ; l++)) 
+#do
+#    cat $l/attach.dat
+#done > attach.dat
+
+
+awk -v npi=$npi 'BEGIN{print 2*npi+2 ; print " "}
+{print "EE",$7,$8,$9; print "EH",$7,$8,$9;
+x1+=$5*$7; 
+y1+=$5*$8;
+z1+=$5*$9;
+x2+=$6*$7; 
+y2+=$6*$8; 
+z2+=$6*$9;
+if ($2==(npi-1)) {print "CH",x1,y1,z1; print "CE",x2,y2,z2; x1=0 ; y1=0 ; z1=0 ; x2=0 ; y2=0 ; z2=0}}' attach.dat > attach.xyz
+
+#first number is total number of lines: npi + npi + 2
+#second number is last npi number in attach.dat (start counting at 0)
+
+#this cuts up attach.dat into multiple little ones again for I have no idea what reason since you already had them to begin with.
+nsnap=`awk -v nnuc=$nnuc '{if ($1==nnuc) sum++}END{print sum}' movie.xyz`
+for ((l = 1 ; l <= $nsnap ; l++)) 
+do 
+    head -n $(((l-1)*$nnuc+$nnuc)) attach.dat | tail -n $nnuc > atemp_$l
+done
+

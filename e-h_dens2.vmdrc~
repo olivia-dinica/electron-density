@@ -1,0 +1,59 @@
+###########################################
+##										 ##
+## Script to automate VMD rendering		 ##
+## of e-h density stills and videos		 ##
+##										 ##
+## Olivia Dinica						 ##
+##										 ##
+## To Call in TkConsole:				 ##
+## >source $PATH/e-h_dens2.vmdrc		 ##
+##										 ##
+## REMEMBER to define atom colours below ##
+##										 ##
+###########################################
+
+##load files
+#######################################
+#mol new movie.xyz
+mol new attach.xyz
+
+##set color properties
+####################################
+color Display Background white
+color Name A black
+#color Name Z black
+#color Name R black
+color Name S yellow
+color Name N cyan3
+color Name M cyan3
+
+##display properties
+####################################
+axes location off
+display projection orthographic
+display depthcue off
+display resize 360 566
+
+##base molecule properties
+####################################
+mol addrep 0
+mol modstyle 0 0 Licorice 0.2 10 20 
+
+##e density properties (VDW)
+####################################
+mol addrep 1
+mol modstyle 1 1 VDW 1.0 30
+mol modcolor 1 1 ColorID 1
+mol modselect 1 1 {all type EE}
+mol modmaterial 1 1 Transparent
+
+#h density properties (VDW)
+####################################
+mol addrep 1
+mol modstyle 2 1 VDW 1.1 30
+mol modcolor 2 1 ColorID 0
+mol modselect 2 1 {all type EH}
+mol modmaterial 2 1 Transparent
+mol delrep 0 1
+
+menu render on
